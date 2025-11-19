@@ -28,10 +28,10 @@ RUN pip install timm==0.6.7
 
 # Install MMPose
 RUN conda clean --all
-RUN git clone https://github.com/open-mmlab/mmpose.git /mmpose
-WORKDIR /mmpose
+RUN git clone https://github.com/open-mmlab/mmpose.git /opt/mmpose
+WORKDIR /opt/mmpose
 RUN git checkout v0.24.0
-RUN mkdir -p /mmpose/data
+RUN mkdir -p /opt/mmpose/data
 ENV FORCE_CUDA="1"
 RUN pip install -r requirements/build.txt
 RUN pip install --no-cache-dir -e .
@@ -41,3 +41,13 @@ RUN pip install opencv-python streamlit ikpy numpy pythreejs matplotlib ffmpy==0
 
 # Facilitar importación de paquetes montados desde el host
 ENV PYTHONPATH=/workspace${PYTHONPATH:+:${PYTHONPATH}}
+
+# Preparar enlaces simbólicos para priorizar la copia montada de MMPose
+RUN ln -s /opt/mmpose /mmpose
+RUN mkdir -p /workspace
+RUN printf '#!/bin/bash\nset -e\nif [ -d /workspace/mmpose ]; then\n  rm -f /mmpose\n  ln -s /workspace/mmpose /mmpose\nelse\n  rm -f /mmpose\n  ln -s /opt/mmpose /mmpose\nfi\nexec "$@"\n' > /usr/local/bin/vitpose-entrypoint.sh \
+    && chmod +x /usr/local/bin/vitpose-entrypoint.sh
+
+WORKDIR /workspace
+ENTRYPOINT ["/usr/local/bin/vitpose-entrypoint.sh"]
+CMD ["/bin/bash"]
