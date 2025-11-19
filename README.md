@@ -1,5 +1,6 @@
----
-# Sistema de animación 3D en tiempo real con ViTPose y Streamlit
+# VitPose_ProyectoFinal
+
+## Sistema de animación 3D en tiempo real con ViTPose y Streamlit
 
 ## Estructura recomendada de carpetas
 
